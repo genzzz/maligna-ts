@@ -1,6 +1,6 @@
 {
-  "name": "maligna",
-  "version": "3.0.0",
+  "name": "maligna-ts",
+  "version": "1.0.0",
   "description": "Sentence alignment tool for bilingual corpora - TypeScript implementation",
   "type": "module",
   "main": "dist/index.js",
