@@ -28,11 +28,11 @@
     "gale-church",
     "moore-algorithm"
   ],
-  "author": "Jarek Lipski (loomchild)",
+  "author": "Genci Shabani (genzzz)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/loomchild/maligna.git"
+    "url": "https://github.com/genzzz/maligna-ts.git"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
