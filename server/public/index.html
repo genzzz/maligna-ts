@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mALIGNa Test Server</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 0.875rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-primary:disabled {
+      background: var(--secondary);
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkbox-group input {
+      width: auto;
+    }
+
+    .options-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .stat {
+      background: var(--bg);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .output-container {
+      position: relative;
+    }
+
+    #output {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      max-height: 600px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    #output.html-output {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    #output.html-output iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--error);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: var(--bg);
+    }
+
+    .input-mode {
+      display: none;
+    }
+
+    .input-mode.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔧 mALIGNa Test Server</h1>
+    <p>Sentence alignment tool for bilingual corpora - TypeScript implementation</p>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Input Panel -->
+      <div class="card">
+        <h2>📝 Input</h2>
+        
+        <div class="tab-buttons">
+          <button type="button" class="tab-btn active" data-tab="examples">Use Examples</button>
+          <button type="button" class="tab-btn" data-tab="custom">Custom Text</button>
+        </div>
+
+        <!-- Example Selection -->
+        <div id="examples-mode" class="input-mode active">
+          <div class="form-group">
+            <label for="exampleSelect">Select Example Pair</label>
+            <select id="exampleSelect">
+              <option value="">Loading examples...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Source Preview</label>
+            <textarea id="sourcePreview" readonly placeholder="Select an example to preview..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Target Preview</label>
+            <textarea id="targetPreview" readonly placeholder="Select an example to preview..."></textarea>
+          </div>
+        </div>
+
+        <!-- Custom Text Input -->
+        <div id="custom-mode" class="input-mode">
+          <div class="form-group">
+            <label for="sourceText">Source Text</label>
+            <textarea id="sourceText" placeholder="Enter source language text..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="targetText">Target Text</label>
+            <textarea id="targetText" placeholder="Enter target language text..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Options Panel -->
+      <div class="card">
+        <h2>⚙️ Options</h2>
+        
+        <div class="options-row">
+          <div class="form-group">
+            <label for="splitMethod">Split Method</label>
+            <select id="splitMethod">
+              <option value="sentence">Sentence Split</option>
+              <option value="paragraph">Paragraph Split</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="alignMethod">Alignment Algorithm</label>
+            <select id="alignMethod">
+              <option value="poisson">Poisson (Length-based)</option>
+              <option value="moore">Moore (Content-based)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="outputFormat">Output Format</label>
+            <select id="outputFormat">
+              <option value="html">HTML Table</option>
+              <option value="json">JSON</option>
+              <option value="txt">Plain Text</option>
+              <option value="al">AL Format</option>
+              <option value="tmx">TMX</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="options-row">
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="selectOneToOne">
+              <label for="selectOneToOne" style="margin-bottom: 0;">Select only 1-to-1 alignments</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fractionThreshold">Fraction Threshold (0-1, optional)</label>
+            <input type="number" id="fractionThreshold" min="0" max="1" step="0.05" placeholder="e.g., 0.85">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" id="alignBtn" class="btn btn-primary">
+            🚀 Align
+          </button>
+          <button type="button" id="clearBtn" class="btn btn-secondary">
+            🗑️ Clear
+          </button>
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Processing...</span>
+          </div>
+        </div>
+
+        <div id="errorBox" class="error" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="card" style="margin-top: 2rem;">
+      <h2>📊 Results</h2>
+      
+      <div class="stats" id="stats" style="display: none;">
+        <div class="stat">
+          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-label">Total Alignments</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="oneToOneCount">0</div>
+          <div class="stat-label">1-to-1 Alignments</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="processingTime">0ms</div>
+          <div class="stat-label">Processing Time</div>
+        </div>
+      </div>
+
+      <div class="output-container">
+        <pre id="output">Select an example or enter custom text, then click "Align" to see results.</pre>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      mALIGNa TypeScript - Sentence alignment tool for bilingual corpora<br>
+      <a href="https://github.com/genzzz/maligna-ts" target="_blank">GitHub Repository</a>
+    </p>
+  </footer>
+
+  <script>
+    // DOM Elements
+    const exampleSelect = document.getElementById('exampleSelect');
+    const sourcePreview = document.getElementById('sourcePreview');
+    const targetPreview = document.getElementById('targetPreview');
+    const sourceText = document.getElementById('sourceText');
+    const targetText = document.getElementById('targetText');
+    const splitMethod = document.getElementById('splitMethod');
+    const alignMethod = document.getElementById('alignMethod');
+    const outputFormat = document.getElementById('outputFormat');
+    const selectOneToOne = document.getElementById('selectOneToOne');
+    const fractionThreshold = document.getElementById('fractionThreshold');
+    const alignBtn = document.getElementById('alignBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const loading = document.getElementById('loading');
+    const errorBox = document.getElementById('errorBox');
+    const output = document.getElementById('output');
+    const stats = document.getElementById('stats');
+    const totalCount = document.getElementById('totalCount');
+    const oneToOneCount = document.getElementById('oneToOneCount');
+    const processingTime = document.getElementById('processingTime');
+
+    // Tab handling
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    let currentTab = 'examples';
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        currentTab = tab;
+        
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        document.querySelectorAll('.input-mode').forEach(mode => {
+          mode.classList.remove('active');
+        });
+        document.getElementById(`${tab}-mode`).classList.add('active');
+      });
+    });
+
+    // Load examples on page load
+    async function loadExamples() {
+      try {
+        const response = await fetch('/api/examples');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          exampleSelect.innerHTML = '<option value="">Select an example...</option>';
+          result.data.forEach(example => {
+            const option = document.createElement('option');
+            option.value = example.name;
+            option.textContent = example.name;
+            exampleSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load examples:', error);
+        exampleSelect.innerHTML = '<option value="">Failed to load examples</option>';
+      }
+    }
+
+    // Load example content when selected
+    exampleSelect.addEventListener('change', async () => {
+      const name = exampleSelect.value;
+      if (!name) {
+        sourcePreview.value = '';
+        targetPreview.value = '';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/example/${encodeURIComponent(name)}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          sourcePreview.value = result.data.source.substring(0, 2000) + 
+            (result.data.source.length > 2000 ? '\n\n... (truncated for preview)' : '');
+          targetPreview.value = result.data.target.substring(0, 2000) + 
+            (result.data.target.length > 2000 ? '\n\n... (truncated for preview)' : '');
+        }
+      } catch (error) {
+        console.error('Failed to load example:', error);
+        sourcePreview.value = 'Error loading example';
+        targetPreview.value = 'Error loading example';
+      }
+    });
+
+    // Perform alignment
+    alignBtn.addEventListener('click', async () => {
+      // Clear previous state
+      errorBox.style.display = 'none';
+      stats.style.display = 'none';
+      
+      // Build request
+      const request = {
+        splitMethod: splitMethod.value,
+        alignMethod: alignMethod.value,
+        outputFormat: outputFormat.value,
+        selectOneToOne: selectOneToOne.checked,
+        fractionThreshold: fractionThreshold.value ? parseFloat(fractionThreshold.value) : undefined,
+      };
+
+      // Add text based on current tab
+      if (currentTab === 'examples') {
+        if (!exampleSelect.value) {
+          showError('Please select an example');
+          return;
+        }
+        request.examplePair = exampleSelect.value;
+      } else {
+        if (!sourceText.value.trim() || !targetText.value.trim()) {
+          showError('Please enter both source and target text');
+          return;
+        }
+        request.sourceText = sourceText.value;
+        request.targetText = targetText.value;
+      }
+
+      // Show loading
+      alignBtn.disabled = true;
+      loading.classList.add('active');
+      output.textContent = 'Processing...';
+
+      try {
+        const response = await fetch('/api/align', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(request),
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Unknown error');
+        }
+
+        // Display stats
+        stats.style.display = 'flex';
+        totalCount.textContent = result.stats.totalAlignments;
+        oneToOneCount.textContent = result.stats.oneToOneCount;
+        processingTime.textContent = `${result.stats.processingTimeMs}ms`;
+
+        // Display output
+        if (result.data.format === 'html') {
+          output.classList.add('html-output');
+          output.innerHTML = '';
+          const iframe = document.createElement('iframe');
+          iframe.srcdoc = result.data.output;
+          output.appendChild(iframe);
+        } else {
+          output.classList.remove('html-output');
+          output.textContent = result.data.output;
+        }
+      } catch (error) {
+        showError(error.message);
+        output.textContent = 'Error occurred during alignment.';
+      } finally {
+        alignBtn.disabled = false;
+        loading.classList.remove('active');
+      }
+    });
+
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+      sourceText.value = '';
+      targetText.value = '';
+      sourcePreview.value = '';
+      targetPreview.value = '';
+      exampleSelect.value = '';
+      output.textContent = 'Select an example or enter custom text, then click "Align" to see results.';
+      output.classList.remove('html-output');
+      stats.style.display = 'none';
+      errorBox.style.display = 'none';
+    });
+
+    // Show error helper
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+
+    // Initialize
+    loadExamples();
+  </script>
+</body>
+</html>
