@@ -540,7 +540,8 @@ export class AlignmentService {
       case 'txt':
         const txtFormatter = new PlaintextFormatter();
         const result = txtFormatter.formatSeparate(alignmentList);
-        return `=== SOURCE ===\n${result.source}\n\n=== TARGET ===\n${result.target}`;
+        // Match CLI format: source\n---\ntarget
+        return `${result.source}\n---\n${result.target}`;
       case 'info':
         return new InfoFormatter().format(alignmentList);
       case 'presentation':
