@@ -39,8 +39,17 @@ export class PresentationFormatter implements Formatter {
   format(alignmentList: Alignment[]): string {
     const lines: string[] = [];
 
-    for (let index = 0; index < alignmentList.length; index++) {
-      const alignment = alignmentList[index]!;
+    // Filter out alignments where either source or target is empty
+    const filteredAlignments = alignmentList.filter(alignment => {
+      const hasSource = alignment.sourceSegmentList.length > 0 && 
+        alignment.sourceSegmentList.some(s => s.trim().length > 0);
+      const hasTarget = alignment.targetSegmentList.length > 0 && 
+        alignment.targetSegmentList.some(s => s.trim().length > 0);
+      return hasSource && hasTarget;
+    });
+
+    for (let index = 0; index < filteredAlignments.length; index++) {
+      const alignment = filteredAlignments[index]!;
       const sourceList = this.splitStringList(
         [...alignment.sourceSegmentList],
         this.maxLength
@@ -54,28 +63,33 @@ export class PresentationFormatter implements Formatter {
       let targetIdx = 0;
 
       while (sourceIdx < sourceList.length && targetIdx < targetList.length) {
-        lines.push(
-          this.formatString(sourceList[sourceIdx]!, targetList[targetIdx]!, this.maxLength)
-        );
+        const sourceLine = sourceList[sourceIdx]!;
+        const targetLine = targetList[targetIdx]!;
+        // Skip lines where both source and target are empty (just whitespace)
+        if (sourceLine.trim().length > 0 || targetLine.trim().length > 0) {
+          lines.push(this.formatString(sourceLine, targetLine, this.maxLength));
+        }
         sourceIdx++;
         targetIdx++;
       }
 
       while (sourceIdx < sourceList.length) {
-        lines.push(
-          this.formatString(sourceList[sourceIdx]!, this.emptyString, this.maxLength)
-        );
+        const sourceLine = sourceList[sourceIdx]!;
+        if (sourceLine.trim().length > 0) {
+          lines.push(this.formatString(sourceLine, this.emptyString, this.maxLength));
+        }
         sourceIdx++;
       }
 
       while (targetIdx < targetList.length) {
-        lines.push(
-          this.formatString(this.emptyString, targetList[targetIdx]!, this.maxLength)
-        );
+        const targetLine = targetList[targetIdx]!;
+        if (targetLine.trim().length > 0) {
+          lines.push(this.formatString(this.emptyString, targetLine, this.maxLength));
+        }
         targetIdx++;
       }
 
-      if (index < alignmentList.length - 1) {
+      if (index < filteredAlignments.length - 1) {
         lines.push(
           this.buildString('_', this.maxLength + 1) +
             '|' +
@@ -89,11 +103,14 @@ export class PresentationFormatter implements Formatter {
 
   private splitStringList(stringList: string[], maxLength: number): string[] {
     const splitStringList: string[] = [];
+    
+    // Filter out empty/whitespace-only segments first
+    const nonEmptyList = stringList.filter(s => s.trim().length > 0);
 
-    for (let index = 0; index < stringList.length; index++) {
-      const str = stringList[index]!;
+    for (let index = 0; index < nonEmptyList.length; index++) {
+      const str = nonEmptyList[index]!;
       splitStringList.push(...this.splitString(str, maxLength));
-      if (index < stringList.length - 1) {
+      if (index < nonEmptyList.length - 1) {
         splitStringList.push(this.emptyString);
       }
     }
