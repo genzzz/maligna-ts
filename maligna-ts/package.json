@@ -12,7 +12,8 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "start": "node dist/cli.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [
