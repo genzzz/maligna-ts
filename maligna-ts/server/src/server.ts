@@ -80,20 +80,19 @@ async function handleApiRequest(
       return;
     }
 
-    // GET /api/algorithms - List available alignment algorithms
+    // GET /api/capabilities - List all library capabilities
+    if (pathname === '/api/capabilities' && req.method === 'GET') {
+      const capabilities = alignmentService.getCapabilities();
+      sendJson(res, 200, capabilities);
+      return;
+    }
+
+    // GET /api/algorithms - List available alignment algorithms (legacy, redirects to capabilities)
     if (pathname === '/api/algorithms' && req.method === 'GET') {
+      const capabilities = alignmentService.getCapabilities();
       sendJson(res, 200, {
-        algorithms: [
-          { id: 'galechurch', name: 'Gale & Church', description: 'Classic sentence-length based alignment' },
-          { id: 'poisson', name: 'Poisson', description: 'Poisson distribution based alignment' },
-          { id: 'moore', name: 'Moore', description: 'Moore algorithm for sentence alignment' }
-        ],
-        formats: [
-          { id: 'al', name: 'AL Format', description: 'Internal alignment format' },
-          { id: 'presentation', name: 'Presentation', description: 'Human-readable side-by-side format' },
-          { id: 'tmx', name: 'TMX', description: 'Translation Memory eXchange format' },
-          { id: 'info', name: 'Info', description: 'Summary information about alignments' }
-        ]
+        algorithms: capabilities.algorithms,
+        formats: capabilities.formatters,
       });
       return;
     }
@@ -108,6 +107,13 @@ async function handleApiRequest(
         format?: string;
         sourceLanguage?: string;
         targetLanguage?: string;
+        presentationWidth?: number;
+        splitAlgorithm?: string;
+        applyTrim?: boolean;
+        applyLowercase?: boolean;
+        selector?: string;
+        selectorFraction?: number;
+        selectorProbability?: number;
       };
 
       if (!params.sourceText || !params.targetText) {
@@ -122,6 +128,13 @@ async function handleApiRequest(
         format: params.format || 'presentation',
         sourceLanguage: params.sourceLanguage || 'en',
         targetLanguage: params.targetLanguage || 'pl',
+        presentationWidth: params.presentationWidth,
+        splitAlgorithm: params.splitAlgorithm,
+        applyTrim: params.applyTrim,
+        applyLowercase: params.applyLowercase,
+        selector: params.selector,
+        selectorFraction: params.selectorFraction,
+        selectorProbability: params.selectorProbability,
       });
 
       sendJson(res, 200, result);
@@ -134,7 +147,47 @@ async function handleApiRequest(
       const params = JSON.parse(body) as {
         sourceText: string;
         targetText: string;
+        parserType?: string;
         splitAlgorithm?: string;
+        applyTrim?: boolean;
+        applyLowercase?: boolean;
+        tmxSourceLang?: string;
+        tmxTargetLang?: string;
+      };
+
+      if (!params.sourceText) {
+        sendError(res, 400, 'sourceText is required');
+        return;
+      }
+
+      const result = alignmentService.parse({
+        sourceText: params.sourceText,
+        targetText: params.targetText || '',
+        parserType: params.parserType,
+        splitAlgorithm: params.splitAlgorithm || 'sentence',
+        applyTrim: params.applyTrim,
+        applyLowercase: params.applyLowercase,
+        tmxSourceLang: params.tmxSourceLang,
+        tmxTargetLang: params.tmxTargetLang,
+      });
+
+      sendJson(res, 200, result);
+      return;
+    }
+
+    // POST /api/modify - Apply modifications (split/merge/clean)
+    if (pathname === '/api/modify' && req.method === 'POST') {
+      const body = await readBody(req);
+      const params = JSON.parse(body) as {
+        sourceText: string;
+        targetText: string;
+        operations: Array<{
+          type: 'split' | 'merge' | 'clean';
+          algorithm: string;
+          applyToSource?: boolean;
+          applyToTarget?: boolean;
+          separator?: string;
+        }>;
       };
 
       if (!params.sourceText || !params.targetText) {
@@ -142,13 +195,73 @@ async function handleApiRequest(
         return;
       }
 
-      const result = alignmentService.parse({
+      const result = alignmentService.modify({
         sourceText: params.sourceText,
         targetText: params.targetText,
-        splitAlgorithm: params.splitAlgorithm || 'sentence',
+        operations: params.operations || [],
       });
 
       sendJson(res, 200, result);
+      return;
+    }
+
+    // POST /api/format - Format alignments
+    if (pathname === '/api/format' && req.method === 'POST') {
+      const body = await readBody(req);
+      const params = JSON.parse(body) as {
+        alignments: Array<{
+          sourceSegments: string[];
+          targetSegments: string[];
+          category: string;
+          score: number;
+        }>;
+        format: string;
+        sourceLanguage?: string;
+        targetLanguage?: string;
+        width?: number;
+      };
+
+      if (!params.alignments || !params.format) {
+        sendError(res, 400, 'alignments and format are required');
+        return;
+      }
+
+      const result = alignmentService.format(params.alignments, params.format, {
+        sourceLanguage: params.sourceLanguage,
+        targetLanguage: params.targetLanguage,
+        width: params.width,
+      });
+
+      sendJson(res, 200, { formatted: result });
+      return;
+    }
+
+    // POST /api/select - Apply selection filters
+    if (pathname === '/api/select' && req.method === 'POST') {
+      const body = await readBody(req);
+      const params = JSON.parse(body) as {
+        alignments: Array<{
+          sourceSegments: string[];
+          targetSegments: string[];
+          category: string;
+          score: number;
+        }>;
+        selector: string;
+        fraction?: number;
+        probability?: number;
+      };
+
+      if (!params.alignments || !params.selector) {
+        sendError(res, 400, 'alignments and selector are required');
+        return;
+      }
+
+      const result = alignmentService.select(params.alignments, params.selector, {
+        fraction: params.fraction,
+        probability: params.probability,
+      });
+
+      sendJson(res, 200, { alignments: result });
       return;
     }
 
@@ -211,20 +324,24 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`
-╔══════════════════════════════════════════════════════════════════╗
-║                   mALIGNa-TS Test Server                        ║
-╠══════════════════════════════════════════════════════════════════╣
-║  Server running at http://localhost:${PORT}                        ║
-║                                                                  ║
-║  API Endpoints:                                                  ║
-║    GET  /api/health          - Health check                      ║
-║    GET  /api/algorithms      - List alignment algorithms         ║
-║    GET  /api/examples        - List example file pairs           ║
-║    GET  /api/examples/:name  - Get example content               ║
-║    POST /api/align           - Perform sentence alignment        ║
-║    POST /api/parse           - Parse and split text              ║
-║                                                                  ║
-║  Web UI: http://localhost:${PORT}                                  ║
-╚══════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║                        mALIGNa-TS Test Server                             ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Server running at http://localhost:${PORT}                                   ║
+║                                                                            ║
+║  API Endpoints:                                                            ║
+║    GET  /api/health          - Health check                                ║
+║    GET  /api/capabilities    - List all library capabilities               ║
+║    GET  /api/algorithms      - List alignment algorithms (legacy)          ║
+║    GET  /api/examples        - List example file pairs                     ║
+║    GET  /api/examples/:name  - Get example content                         ║
+║    POST /api/align           - Perform full alignment pipeline             ║
+║    POST /api/parse           - Parse and split text                        ║
+║    POST /api/modify          - Apply modifications (split/merge/clean)     ║
+║    POST /api/format          - Format alignments to different outputs      ║
+║    POST /api/select          - Apply selection filters                     ║
+║                                                                            ║
+║  Web UI: http://localhost:${PORT}                                             ║
+╚════════════════════════════════════════════════════════════════════════════╝
 `);
 });
