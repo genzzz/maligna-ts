@@ -26,13 +26,19 @@ export class PlaintextFormatter implements Formatter {
    * @param alignmentList input alignment list
    * @returns object with source and target strings
    */
-  formatSeparate(alignmentList: Alignment[]): { source: string; target: string } {
+  formatSeparate(alignmentList: Alignment[], skipEmpty: boolean = true): { source: string; target: string } {
     const sourceLines: string[] = [];
     const targetLines: string[] = [];
 
     for (const alignment of alignmentList) {
-      sourceLines.push(this.formatSegmentList(alignment.sourceSegmentList));
-      targetLines.push(this.formatSegmentList(alignment.targetSegmentList));
+      const sourceLine = this.formatSegmentList(alignment.sourceSegmentList);
+      const targetLine = this.formatSegmentList(alignment.targetSegmentList);
+      // Skip alignments where either source or target is empty (if skipEmpty is true)
+      if (skipEmpty && (sourceLine.length === 0 || targetLine.length === 0)) {
+        continue;
+      }
+      sourceLines.push(sourceLine);
+      targetLines.push(targetLine);
     }
 
     return {
