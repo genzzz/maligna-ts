@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+.project
+.classpath
+.settings
+
+# Build outputs
+**/target/
+**/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation (keep files needed for build)
+# README.md, LICENSE.txt, CHANGELOG.md are needed
+
+# Test outputs
+*.al
+*-align.txt
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Output directories
+output/
+data/

@@ -25,6 +25,82 @@ To build the program both JDK 1.6 and Maven are required.
 Theoretically, the program is platform independent (like Java), 
 but it was tested only on Linux and Windows.
 
+## Docker
+
+The easiest way to run mALIGNa is using Docker. No Java installation required.
+
+### Quick Start
+
+```bash
+# Build the Docker image
+docker build -t maligna:latest .
+
+# Show help
+docker run --rm maligna:latest
+
+# Run alignment interactively with your files
+docker run --rm -v $(pwd)/mydata:/data maligna:latest bash -c "
+    maligna parse -c txt /data/source.txt /data/target.txt |
+    maligna modify -c split-sentence |
+    maligna modify -c trim |
+    maligna align -c viterbi -a poisson -n word -s iterative-band |
+    maligna select -c one-to-one |
+    maligna format -c txt /data/source-aligned.txt /data/target-aligned.txt
+"
+```
+
+### Using Docker Compose
+
+Docker Compose provides pre-configured examples:
+
+```bash
+# Run basic Viterbi alignment example
+docker compose run --rm example1
+
+# Run full Moore's algorithm example (multi-step)
+docker compose run --rm example2-full
+
+# Run Oracle alignment example
+docker compose run --rm example3
+
+# Show help
+docker compose run --rm help
+
+# Interactive shell with examples mounted
+docker compose run --rm maligna bash
+```
+
+Output files are written to the `./output` directory.
+
+### Custom Alignment with Docker
+
+Mount your own files and run custom pipelines:
+
+```bash
+# Create data directory
+mkdir -p mydata
+
+# Copy your source and target files
+cp source-lang.txt target-lang.txt mydata/
+
+# Run alignment
+docker run --rm -v $(pwd)/mydata:/data maligna:latest bash -c "
+    maligna parse -c txt /data/source-lang.txt /data/target-lang.txt |
+    maligna modify -c split-sentence |
+    maligna modify -c trim |
+    maligna align -c viterbi -a poisson -n word -s iterative-band |
+    maligna select -c one-to-one |
+    maligna format -c txt /data/aligned-source.txt /data/aligned-target.txt
+"
+```
+
+### Docker Image Details
+
+- **Base Image**: Eclipse Temurin 11 JRE Alpine (minimal footprint)
+- **Working Directory**: `/data` (mount your files here)
+- **Examples**: Available at `/opt/maligna/examples` inside container
+- **User**: Non-root user `maligna` for security
+
 ## Running
 
 Aligning documents consists of several stages, which may be performed 
