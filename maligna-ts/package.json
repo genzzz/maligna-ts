@@ -1,0 +1,44 @@
+{
+  "name": "maligna-ts",
+  "version": "1.0.0",
+  "description": "Sentence alignment library - TypeScript implementation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "maligna": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "alignment",
+    "sentence-alignment",
+    "bilingual",
+    "parallel-corpus",
+    "translation-memory",
+    "nlp",
+    "gale-church",
+    "moore-algorithm"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fast-xml-parser": "^4.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
