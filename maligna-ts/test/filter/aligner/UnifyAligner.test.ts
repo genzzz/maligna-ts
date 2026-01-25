@@ -1,4 +1,3 @@
-import { Alignment } from '../../../src/coretypes/Alignment';
 import { UnifyAligner } from '../../../src/filter/aligner/UnifyAligner';
 import {
   assertAlignmentListEquals,

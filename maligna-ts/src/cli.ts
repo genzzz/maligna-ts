@@ -8,7 +8,7 @@ import { AlFormatter, PlaintextFormatter, TmxFormatter, InfoFormatter, Presentat
 import { GaleAndChurchMacro, PoissonMacro, MooreMacro } from './filter/macro/index.js';
 import { Filter } from './filter/Filter.js';
 import { Modifier } from './filter/modifier/Modifier.js';
-import { SplitAlgorithm, SentenceSplitAlgorithm, WordSplitAlgorithm, ParagraphSplitAlgorithm } from './filter/modifier/modify/split/index.js';
+import { SentenceSplitAlgorithm, WordSplitAlgorithm, ParagraphSplitAlgorithm } from './filter/modifier/modify/split/index.js';
 import { TrimCleanAlgorithm, LowercaseCleanAlgorithm } from './filter/modifier/modify/clean/index.js';
 import { SeparatorMergeAlgorithm } from './filter/modifier/modify/merge/index.js';
 import { OneToOneSelector, FractionSelector, ProbabilitySelector } from './filter/selector/index.js';
@@ -30,7 +30,7 @@ program
   .option('-l, --languages <langs>', 'Source and target language (comma-separated, for tmx)')
   .argument('[files...]', 'Input files')
   .action((files: string[], options: { class: string; languages?: string }) => {
-    let alignmentList: Alignment[] = [];
+    const alignmentList: Alignment[] = [];
 
     if (options.class === 'al') {
       for (const fileName of files) {

@@ -1,13 +1,11 @@
 import { Alignment } from '../../src/coretypes/Alignment';
 import { PresentationFormatter } from '../../src/formatter/PresentationFormatter';
 import { createAlignmentList } from '../util/TestUtil';
-import { SOURCE_ARRAY, TARGET_ARRAY } from './AlFormatter.test.data';
 
 /**
  * Represents PresentationFormatter test.
  */
 describe('PresentationFormatter', () => {
-  const LINE_SEPARATOR = '\n';
 
   /**
    * Tests if formatting empty text returns empty output.

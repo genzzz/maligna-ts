@@ -1,5 +1,4 @@
 import { Alignment } from '../../../coretypes/Alignment.js';
-import { Category } from '../../../coretypes/Category.js';
 
 /**
  * Represents alignment algorithm.

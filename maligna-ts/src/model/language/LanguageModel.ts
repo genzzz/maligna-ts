@@ -1,5 +1,3 @@
-import { Vocabulary } from '../vocabulary/Vocabulary.js';
-
 /**
  * Represents simple unigram language model. Responsible for storing
  * word probabilities in given language. Words are represented as

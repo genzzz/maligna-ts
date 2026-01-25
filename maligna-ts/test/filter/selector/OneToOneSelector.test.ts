@@ -1,4 +1,3 @@
-import { Alignment } from '../../../src/coretypes/Alignment';
 import { OneToOneSelector } from '../../../src/filter/selector/OneToOneSelector';
 import {
   assertAlignmentListEquals,

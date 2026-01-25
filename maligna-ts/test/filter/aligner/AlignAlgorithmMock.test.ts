@@ -1,4 +1,3 @@
-import { Alignment } from '../../../src/coretypes/Alignment';
 import { AlignAlgorithmMock } from './align/AlignAlgorithmMock';
 import { assertAlignmentEquals } from '../../util/TestUtil';
 

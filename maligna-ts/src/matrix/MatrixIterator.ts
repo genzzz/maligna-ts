@@ -6,7 +6,7 @@
  * store them, but the overall order must be preserved.
  * Also enables iterating the matrix in reverse order.
  */
-export interface MatrixIterator<T> {
+export interface MatrixIterator<_T> {
   /**
    * @returns x position of the iterator (column)
    */

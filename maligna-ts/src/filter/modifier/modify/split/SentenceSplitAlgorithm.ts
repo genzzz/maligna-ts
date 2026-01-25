@@ -18,7 +18,7 @@ class SimpleSplitter {
 
   next(): string {
     const start = this.position;
-    let inSentence = false;
+    let _inSentence = false;
 
     while (this.position < this.text.length) {
       const ch = this.text.charAt(this.position);
@@ -34,7 +34,7 @@ class SimpleSplitter {
 
       // Handle sentence-ending punctuation
       if (ch === '.' || ch === '?' || ch === '!') {
-        inSentence = true;
+        _inSentence = true;
         // Look ahead for capital letter after whitespace
         let lookAhead = this.position;
         while (lookAhead < this.text.length) {

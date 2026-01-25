@@ -2,24 +2,26 @@
 export default {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
+  roots: ['<rootDir>'],
+  testMatch: ['**/test/**/*.test.ts'],
   extensionsToTreatAsEsm: ['.ts'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: {
-          module: 'ESNext',
-          moduleResolution: 'Node',
+        tsconfig: 'tsconfig.test.json',
+        diagnostics: {
+          ignoreCodes: [151002],
         },
       },
     ],
   },
-  testMatch: ['**/test/**/*.test.ts'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/cli/**/*.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   coverageDirectory: 'coverage',
   verbose: true,
 };

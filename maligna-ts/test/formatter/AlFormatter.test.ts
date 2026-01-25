@@ -1,4 +1,3 @@
-import { Alignment } from '../../src/coretypes/Alignment';
 import { AlFormatter } from '../../src/formatter/AlFormatter';
 import { AlParser } from '../../src/parser/AlParser';
 import {
