@@ -39,58 +39,13 @@ docker build -t maligna:latest .
 docker run --rm maligna:latest
 
 # Run alignment interactively with your files
-docker run --rm -v $(pwd)/mydata:/data maligna:latest bash -c "
-    maligna parse -c txt /data/source.txt /data/target.txt |
+docker run --rm maligna:latest bash -c "
+    maligna parse -c txt /opt/maligna/examples/txt/poznan-pl.txt /opt/maligna/examples/txt/poznan-de.txt |
     maligna modify -c split-sentence |
     maligna modify -c trim |
     maligna align -c viterbi -a poisson -n word -s iterative-band |
     maligna select -c one-to-one |
-    maligna format -c txt /data/source-aligned.txt /data/target-aligned.txt
-"
-```
-
-### Using Docker Compose
-
-Docker Compose provides pre-configured examples:
-
-```bash
-# Run basic Viterbi alignment example
-docker compose run --rm example1
-
-# Run full Moore's algorithm example (multi-step)
-docker compose run --rm example2-full
-
-# Run Oracle alignment example
-docker compose run --rm example3
-
-# Show help
-docker compose run --rm help
-
-# Interactive shell with examples mounted
-docker compose run --rm maligna bash
-```
-
-Output files are written to the `./output` directory.
-
-### Custom Alignment with Docker
-
-Mount your own files and run custom pipelines:
-
-```bash
-# Create data directory
-mkdir -p mydata
-
-# Copy your source and target files
-cp source-lang.txt target-lang.txt mydata/
-
-# Run alignment
-docker run --rm -v $(pwd)/mydata:/data maligna:latest bash -c "
-    maligna parse -c txt /data/source-lang.txt /data/target-lang.txt |
-    maligna modify -c split-sentence |
-    maligna modify -c trim |
-    maligna align -c viterbi -a poisson -n word -s iterative-band |
-    maligna select -c one-to-one |
-    maligna format -c txt /data/aligned-source.txt /data/aligned-target.txt
+    maligna format -c txt source-aligned.txt target-aligned.txt
 "
 ```
 
