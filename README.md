@@ -25,6 +25,37 @@ To build the program both JDK 1.6 and Maven are required.
 Theoretically, the program is platform independent (like Java), 
 but it was tested only on Linux and Windows.
 
+## Docker
+
+The easiest way to run mALIGNa is using Docker. No Java installation required.
+
+### Quick Start
+
+```bash
+# Build the Docker image
+docker build -t maligna:latest .
+
+# Show help
+docker run --rm maligna:latest
+
+# Run alignment interactively with your files
+docker run --rm maligna:latest bash -c "
+    maligna parse -c txt /opt/maligna/examples/txt/poznan-pl.txt /opt/maligna/examples/txt/poznan-de.txt |
+    maligna modify -c split-sentence |
+    maligna modify -c trim |
+    maligna align -c viterbi -a poisson -n word -s iterative-band |
+    maligna select -c one-to-one |
+    maligna format -c txt source-aligned.txt target-aligned.txt
+"
+```
+
+### Docker Image Details
+
+- **Base Image**: Eclipse Temurin 11 JRE Alpine (minimal footprint)
+- **Working Directory**: `/data` (mount your files here)
+- **Examples**: Available at `/opt/maligna/examples` inside container
+- **User**: Non-root user `maligna` for security
+
 ## Running
 
 Aligning documents consists of several stages, which may be performed 
