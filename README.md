@@ -1,265 +1,128 @@
-# mALIGNa
+# mALIGNa-ts
 
-## Introduction
+Sentence alignment toolkit for bilingual corpora.
 
-mALIGNa is a program for aligning documents on the sentence level. 
-It contains implementations of a few groups of alignment algorithms -
-algorithms based exclusively on the sentence length (Gale and Church, Brown), 
-algorithms based on the connections between words (Moore's algorithm), 
-as well as any variation and intersection of these algorithms. 
-The aim of alignment is to obtain a bilingual corpus. 
-It can be used for creating translation memories, translation by analogy, 
-modelling probabilistic dictionaries and other applications.
-More information about maligna can be found in an article which I co-authored 
-(see Resources section).
+> **Status:** This project is in active development and is **not production-ready** yet.
 
-## Library
+`mALIGNa-ts` is a TypeScript/Node.js port of the original Java [maligna](https://github.com/loomchild/maligna), preserving core sentence-alignment algorithms and CLI workflow.
 
-mALIGNa library is available on [Maven central](http://search.maven.org/#search|ga|1|net.loomchild.maligna). 
-See [pom.xml](maligna/pom.xml) for details.
+## Highlights
+
+- Multiple alignment strategies (length-based, translation-based, hybrid workflows)
+- End-to-end CLI pipeline: parse → modify → align → select → format
+- Library API for Node.js apps and browser integrations
+- CJS + ESM package outputs
 
 ## Requirements
 
-JVM 1.6 is required to run the program. 
-To build the program both JDK 1.6 and Maven are required. 
-Theoretically, the program is platform independent (like Java), 
-but it was tested only on Linux and Windows.
+- Node.js **v24+**
 
-## Docker
+## Installation (GitHub only)
 
-The easiest way to run mALIGNa is using Docker. No Java installation required.
-
-### Quick Start
+This package is currently installed directly from GitHub:
 
 ```bash
-# Build the Docker image
-docker build -t maligna:latest .
-
-# Show help
-docker run --rm maligna:latest
-
-# Run alignment interactively with your files
-docker run --rm maligna:latest bash -c "
-    maligna parse -c txt /opt/maligna/examples/txt/poznan-pl.txt /opt/maligna/examples/txt/poznan-de.txt |
-    maligna modify -c split-sentence |
-    maligna modify -c trim |
-    maligna align -c viterbi -a poisson -n word -s iterative-band |
-    maligna select -c one-to-one |
-    maligna format -c txt source-aligned.txt target-aligned.txt
-"
+npm i genzzz/maligna-ts
 ```
 
-### Docker Image Details
+Optional pinned install examples:
 
-- **Base Image**: Eclipse Temurin 11 JRE Alpine (minimal footprint)
-- **Working Directory**: `/data` (mount your files here)
-- **Examples**: Available at `/opt/maligna/examples` inside container
-- **User**: Non-root user `maligna` for security
+```bash
+npm i genzzz/maligna-ts#v0.0.1
+npm i genzzz/maligna-ts#<commit-sha>
+```
 
-## Running
+## CLI usage
 
-Aligning documents consists of several stages, which may be performed 
-in different ways. Therefore, the text interface of the program is divided 
-into several independent commands. A common feature of the commands is 
-that they read input text from standard input and write the results 
-to standard output, always using the native format .al. 
-Therefore these programs act as filters and may be combined in a pipe using |. 
-Below is a brief description of each command, you can get more information 
-about exact parameters of individual commands using the option --help. 
-At the end of this document, there is a complete example of text 
-alignment using several commands connected in a pipeline.
+Build first:
 
-### The 'parse' command
+```bash
+npm run build
+```
 
-The parse command is used to convert an external format 
-to the native format .al. It also allows you to combine several documents 
-into one, by giving a list of files as arguments. 
-It accepts input files as arguments and writes the result to standard output. 
-This command can only occur at the beginning of the pipeline.
+Then run:
 
-### The 'format' command
+```bash
+npm run start -- --help
+```
 
-The 'format' command is used to convert the native format .al 
-to an external format. It reads data from standard input and writes the result 
-to the files given as arguments. This command can only occur at the end 
-of the pipeline.
+### Example CLI pipeline
 
-### The 'align' command
+```bash
+maligna parse -c txt source.txt target.txt | \
+maligna modify -c split-sentence | \
+maligna modify -c trim | \
+maligna macro -c galechurch | \
+maligna select -c one-to-one | \
+maligna format -c presentation
+```
 
-Align command. Segments of each of the input mappings are aligned independently,
-thanks to which alignment can be performed at different levels of accuracy 
-(document, paragraph, sentence), by performing consecutive alignment operations,
-and then dividing the results into smaller and smaller segments. 
-Filter; may be used at any point of the pipeline.
+## Library usage (functional example)
 
-### The 'modify' command
+```ts
+import {
+  PlaintextParser,
+  Modifier,
+  SentenceSplitAlgorithm,
+  TrimCleanAlgorithm,
+  GaleAndChurchMacro,
+  decorateFilter,
+  PresentationFormatter,
+} from 'maligna-ts';
 
-This command performs modifications on every mapping, replacing source and 
-target lists of segments with other lists of segments. 
-Both the amount of the segments and their contents may be changed 
-(e.g. merge segments in one, split segment into more segments or 
-remove unnecessary whitespace in each segment). 
-Filter; may be used at any point of the pipeline.
+const sourceText = `This is a short source text. It has two sentences.`;
+const targetText = `Dies ist ein kurzer Zieltext. Er hat zwei Sätze.`;
 
-### The 'select' command
+const parser = new PlaintextParser(sourceText, targetText);
+let alignmentList = parser.parse();
 
-Basing on certain criteria, chooses from the input list of mappings only 
-some mappings and writes them to standard output. 
-Eg. using this command you can choose only the most probable mappings 
-or only 1 - 1 mappings. Filter; may be used at any point of the pipeline.
+const splitFilter = new Modifier(new SentenceSplitAlgorithm(), new SentenceSplitAlgorithm());
+alignmentList = splitFilter.apply(alignmentList);
 
-### 3.6 The 'compare' command
+const trimFilter = new Modifier(new TrimCleanAlgorithm(), new TrimCleanAlgorithm());
+alignmentList = trimFilter.apply(alignmentList);
 
-This command is used for comparing two files of alignments with each other, 
-provided as arguments, returning the degree of their similarity 
-(precision, recall) and the differences occurring. 
-Used for test purposes outside the pipeline.
+const alignFilter = decorateFilter(new GaleAndChurchMacro());
+alignmentList = alignFilter.apply(alignmentList);
 
-### The 'model' command
+const formatter = new PresentationFormatter();
+console.log(formatter.format(alignmentList));
+```
 
-This command manipulates translation, language and length models. 
-Currently not fully implemented.
-Used outside the pipeline.
+## Package metadata
 
-### The 'macro' command
+- Name: `maligna-ts`
+- Display name: `mALIGNa-ts`
+- Description: `Sentence alignment toolkit`
+- Version: `0.0.1`
+- License: `Apache-2.0`
+- Repository: https://github.com/genzzz/maligna-ts.git
+- Homepage: https://github.com/genzzz/maligna-ts/
 
-Executes a set of predefined filtering commands, like doing a Moore alignment.
-Created to simplify complex operations and improve the performance.
-Filter; may be used at any point of the pipeline.
+## Contributing
 
+Contributions are welcome from everyone.
 
-### The 'test' command
-
-Runs the program's automatic tests.
-
-### Examples
-
-Below I have given examples of pipelines of commands that that should be used 
-to align two documents in .txt files and write the results as two .txt files. 
-The output documents will contain the same number of sentences, 
-one per line, and sentences of corresponding numbers should be mutual 
-translations. The commands given below will do everything required, 
-however it is worth remembering that sometimes it's better to preserve 
-the intermediate results of the operations of each command in temporary files 
-instead of redirecting them directly to the next command for debugging purposes. 
-This example should be executed in the main directory of the project. 
-Ready to run example scripts can be found in the examples/scripts directory.
-
-    bin/maligna parse -c txt examples/txt/poznan-pl.txt examples/txt/poznan-de.txt | \
-    bin/maligna modify -c split-sentence | \
-    bin/maligna modify -c trim | \
-    bin/maligna align -c viterbi -a poisson -n word -s iterative-band | \
-    bin/maligna select -c one-to-one | \
-    bin/maligna format -c txt poznan-pl-align.txt poznan-de-align.txt
-
-Another interesting case is alignment using Moore's algorithm, 
-which requires a properly aligned corpus to build a translation model. 
-To do this you must perform several groups of commands.
-
-Split a text into sentences and clean them up:
-
-    bin/maligna parse -c txt examples/txt/poznan-pl.txt examples/txt/poznan-de.txt | \
-    bin/maligna modify -c split-sentence | \
-    bin/maligna modify -c trim > \
-    poznan-split.al
-
-Align using sentence length-based algorithm (Brown, Gale and Church) 
-and select most probable alignments:
-
-    cat poznan-split.al | \
-    bin/maligna align -c viterbi -a poisson -n word -s iterative-band | \
-    bin/maligna select -c one-to-one | \
-    bin/maligna select -c fraction -f 0.85 > \
-    poznan-align-length.al
-
-Finally align using Moore's algorithm:
-
-    cat poznan-split.al | \
-    bin/maligna align -c viterbi -a translation -n word -s iterative-band -t poznan-align-length.al > \
-    poznan-align.al
-
-## Formats
-
-Most commands expect input and output in the native format .al. 
-To use a different format, you must parse the input using the parse command. 
-To get the result in another format, you need to format it using 
-the format command.
-
-### The .al format
-
-This is the native format for alignment files. 
-Contains all necessary information for each mapping: 
-lists of source and target segments and mapping score (-log(probability)).
-If mapping score is equal to "-INF" then all commands ignore this mapping,
-no operation is performed on it. This feature can be used to mark manual, 
-human-aligned fragments to be preserved in the result.  
-
-### The .tmx format
-
-The standard format for translation memories, supported by many tools. 
-Both an input and output format. For the full specification see
-<a href="http://www.lisa.org/standards/tmx/tmx.html">http://www.lisa.org/standards/tmx/tmx.html</a>.
-
-### The .txt format
-
-Plain text, in the form of two files in two languages. 
-On input the whole file is treated as one segment. 
-On output, successive lines of files correspond to mappings and are 
-mutual translations (which implies that numbers of lines are equal).
-
-### The presentation format
-
-An output format which presents an alignment in a human readable manner.
-
-## Algorithms
-
-In the program a few alignment algorithms were implemented, and thanks to the 
-flexibility of the code it is easy to add new algorithms, 
-modify the existing ones and join their results together.
-
-### Gale and Church algorithm
-
-This is a fast bilingual text alignment algorithm. The algorithm counts the 
-probability of each possible mapping, which depends on ratio of lengths of 
-sentences in each language. Next it finds alignment for the whole text with 
-maximum probability (calculated as a product of individual mapping probabilities). 
-Details can be found in the Gale and Church article, referenced in resources.
-
-### Moore's algorithm
-
-This is a modern algorithm based not only on the length of sentences but also on 
-their contents. 
-The first phase of operation of this algorithm is alignment based on length 
-(for example using Gale and Church algorithm described above). 
-Next, from this alignment only 1 - 1 mappings alignments are selected, 
-and from them only the most probable ones (e.g. 80% probability) are selected. 
-In this manner a relatively well aligned corpus is yielded. 
-Later a translation model (IBM Model 1) and unigram language models are built 
-based on this corpus. 
-In the final alignment, probability of the translation of the source sentence to 
-the target sentence is taken into account (calculated on the basis of the 
-translation model and the language models). 
-Details can be found in the Moore article, referenced in the resources.
-
-## Resources
-
-1. A new tool for the bilingual text aligning at the sentence level, 
-   Krzysztof Jassem, Jarek Lipski, Proceedings of Intelligent Information Systems Conference 2008, Zakopane, Poland,
-   http://iis.ipipan.waw.pl/2008/proceedings/iis08-27.pdf
-2. A Program for Aligning Sentences in Bilingual Corpora, William A. Gale, Kenneth Ward Church
-3. Fast and Accurate Sentence Alignment of Bilingual Corpora, Robert C. Moore
+- Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Issues: https://github.com/genzzz/maligna-ts/issues
 
 ## Authors
 
-* Jarek Lipski - creation of the project, design and programming
-* Jimmy O'Regan - translation of readme file to English
+- Genci Shabani — TypeScript version author
+- Jarek Lipski — original Java project, design and algorithms
+- Jimmy O'Regan — translation of the original README to English
 
-## Thanks
+## License
 
-I wrote this program during my studies in Machine Translation, 
-and later I expanded it as practical part of a master's thesis.
-Currently it is being developed as an open-source project and used by
-various other projects. Happy aligning!
+Licensed under Apache License 2.0.
+See [LICENSE](LICENSE).
 
-&nbsp;&nbsp;&nbsp;&nbsp;-- Jarek Lipski
+## What to improve next (professionalization roadmap)
 
+1. Add GitHub Actions CI (Node 24) for `build`, `test`, and package smoke tests.
+2. Add release automation (semantic versioning + changelog generation).
+3. Add static quality tooling (`eslint`, formatting, dependency/unused export checks).
+4. Add npm tarball verification workflow (`npm pack --dry-run` + CJS/ESM consumer fixtures).
+5. Expand integration tests for CLI pipelines and model training edge cases.
+6. Add benchmark suite for alignment algorithms across larger corpora.

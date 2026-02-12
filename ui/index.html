@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mALIGNa-ts UI — Sentence alignment toolkit</title>
+</head>
+<body>
+
+  <!-- ═══ Header ═══ -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo">m<span class="accent">ALIGN</span>a-ts</h1>
+      <span class="subtitle">Interactive Testing UI</span>
+    </div>
+    <div class="header-right">
+      <span class="version">v0.0.1</span>
+    </div>
+  </header>
+
+  <!-- ═══ Main Layout ═══ -->
+  <div class="main-layout">
+
+    <!-- ─── Left Panel: Input ─── -->
+    <section class="panel panel-input">
+      <div class="panel-header">
+        <h2>Input</h2>
+      </div>
+
+      <!-- Input Tabs -->
+      <div class="tab-bar" id="input-tabs">
+        <button class="tab active" data-tab="examples">Examples</button>
+        <button class="tab" data-tab="custom">Custom Text</button>
+        <button class="tab" data-tab="upload">Upload .al / .tmx</button>
+      </div>
+
+      <!-- Examples Tab -->
+      <div class="tab-content active" id="tab-examples">
+        <div class="form-group">
+          <label for="example-select">Select Example</label>
+          <select id="example-select" class="select">
+            <option value="">Loading examples...</option>
+          </select>
+        </div>
+        <div class="example-meta" id="example-meta" style="display: none;">
+          <div class="meta-badges">
+            <span class="badge" id="badge-source-lang"></span>
+            <span class="badge" id="badge-target-lang"></span>
+            <span class="badge badge-dim" id="badge-size"></span>
+          </div>
+          <div class="meta-refs" id="meta-refs"></div>
+        </div>
+        <div class="form-group">
+          <label>Source Text Preview</label>
+          <textarea id="example-source-preview" class="textarea preview" readonly rows="6"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Target Text Preview</label>
+          <textarea id="example-target-preview" class="textarea preview" readonly rows="6"></textarea>
+        </div>
+      </div>
+
+      <!-- Custom Text Tab -->
+      <div class="tab-content" id="tab-custom">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="custom-source-lang">Source Lang</label>
+            <input type="text" id="custom-source-lang" class="input" value="en" placeholder="e.g., en">
+          </div>
+          <div class="form-group flex-1">
+            <label for="custom-target-lang">Target Lang</label>
+            <input type="text" id="custom-target-lang" class="input" value="de" placeholder="e.g., de">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="custom-source">Source Text</label>
+          <textarea id="custom-source" class="textarea" rows="8" placeholder="Enter source text..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="custom-target">Target Text</label>
+          <textarea id="custom-target" class="textarea" rows="8" placeholder="Enter target text..."></textarea>
+        </div>
+      </div>
+
+      <!-- Upload Tab -->
+      <div class="tab-content" id="tab-upload">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">&#128196;</div>
+          <p>Drop <strong>.al</strong> or <strong>.tmx</strong> file here</p>
+          <p class="dim">or click to browse</p>
+          <input type="file" id="file-input" accept=".al,.tmx,.xml" style="display:none">
+        </div>
+        <div class="form-group" id="upload-format-group" style="display:none">
+          <label>Detected Format</label>
+          <span class="badge" id="upload-format-badge"></span>
+        </div>
+        <div class="form-row" id="upload-lang-row" style="display:none">
+          <div class="form-group flex-1">
+            <label for="upload-source-lang">Source Lang</label>
+            <input type="text" id="upload-source-lang" class="input" value="" placeholder="e.g., en">
+          </div>
+          <div class="form-group flex-1">
+            <label for="upload-target-lang">Target Lang</label>
+            <input type="text" id="upload-target-lang" class="input" value="" placeholder="e.g., de">
+          </div>
+        </div>
+        <div class="form-group" id="upload-preview-group" style="display:none">
+          <label>File Content Preview</label>
+          <textarea id="upload-preview" class="textarea preview" readonly rows="8"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Center Panel: Pipeline ─── -->
+    <section class="panel panel-pipeline">
+      <div class="panel-header">
+        <h2>Pipeline</h2>
+        <div class="panel-actions">
+          <button class="btn btn-sm btn-outline" id="btn-clear-pipeline" title="Clear all steps">Clear</button>
+        </div>
+      </div>
+
+      <!-- Quick Macros -->
+      <div class="macro-bar">
+        <span class="macro-label">Quick Macros:</span>
+        <button class="btn btn-macro" data-macro="galechurch" title="Gale & Church: char + normal + Viterbi + adaptive band">Gale &amp; Church</button>
+        <button class="btn btn-macro" data-macro="poisson" title="Poisson: word + Poisson + FB + adaptive band">Poisson</button>
+        <button class="btn btn-macro" data-macro="moore" title="Moore: two-pass with translation model">Moore</button>
+        <button class="btn btn-macro" data-macro="translation" title="Translation: Normal FB → train TM → Translation FB">Translation</button>
+        <button class="btn btn-macro" data-macro="poisson-translation" title="Poisson-Translation: Poisson FB → train TM → composite FB">Poisson+Trans</button>
+      </div>
+
+      <!-- Pipeline Steps -->
+      <div class="pipeline-steps" id="pipeline-steps">
+        <div class="pipeline-empty" id="pipeline-empty">
+          <p>No pipeline steps configured.</p>
+          <p class="dim">Use the Quick Macros above or add steps manually below.</p>
+        </div>
+      </div>
+
+      <!-- Add Step Buttons -->
+      <div class="add-step-bar">
+        <span class="add-label">Add Step:</span>
+        <button class="btn btn-add btn-modify" data-type="modify">+ Modify</button>
+        <button class="btn btn-add btn-align" data-type="align">+ Align</button>
+        <button class="btn btn-add btn-select" data-type="select">+ Select</button>
+        <button class="btn btn-add btn-macro-step" data-type="macro">+ Macro</button>
+      </div>
+
+      <!-- Format Options -->
+      <div class="format-section">
+        <h3>Output Format</h3>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="format-class">Primary Format</label>
+            <select id="format-class" class="select">
+              <option value="presentation" selected>Presentation</option>
+              <option value="html">HTML Table</option>
+              <option value="al">AL XML</option>
+              <option value="tmx">TMX</option>
+              <option value="txt">Plain Text</option>
+              <option value="info">Info / Stats</option>
+            </select>
+          </div>
+          <div class="form-group" id="format-width-group">
+            <label for="format-width">Width</label>
+            <input type="number" id="format-width" class="input input-sm" value="100" min="5">
+          </div>
+        </div>
+      </div>
+
+      <!-- Run Button -->
+      <div class="run-section">
+        <button class="btn btn-run" id="btn-run">
+          <span class="run-icon">&#9654;</span> Run Pipeline
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── Right Panel: Results ─── -->
+    <section class="panel panel-results">
+      <div class="panel-header">
+        <h2>Results</h2>
+        <div class="panel-actions">
+          <span class="result-count" id="result-count"></span>
+          <button class="btn btn-sm btn-outline" id="btn-download" style="display:none">Download</button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-container" id="progress-container" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Starting...</div>
+        <div class="progress-steps" id="progress-steps"></div>
+      </div>
+
+      <!-- Result Tabs -->
+      <div class="tab-bar" id="result-tabs">
+        <button class="tab active" data-tab="result-presentation">Presentation</button>
+        <button class="tab" data-tab="result-html">HTML</button>
+        <button class="tab" data-tab="result-info">Info</button>
+        <button class="tab" data-tab="result-al">AL</button>
+        <button class="tab" data-tab="result-tmx">TMX</button>
+      </div>
+
+      <div class="tab-content active" id="tab-result-presentation">
+        <pre class="result-pre" id="result-presentation">Run a pipeline to see results here.</pre>
+      </div>
+      <div class="tab-content" id="tab-result-html">
+        <div class="result-html-container" id="result-html">Run a pipeline to see results here.</div>
+      </div>
+      <div class="tab-content" id="tab-result-info">
+        <pre class="result-pre" id="result-info">Run a pipeline to see results here.</pre>
+      </div>
+      <div class="tab-content" id="tab-result-al">
+        <pre class="result-pre result-code" id="result-al">Run a pipeline to see results here.</pre>
+      </div>
+      <div class="tab-content" id="tab-result-tmx">
+        <pre class="result-pre result-code" id="result-tmx">Run a pipeline to see results here.</pre>
+      </div>
+
+      <!-- Compare Section -->
+      <div class="compare-section">
+        <div class="compare-header" id="compare-toggle">
+          <h3>&#9660; Compare with Reference</h3>
+        </div>
+        <div class="compare-body" id="compare-body" style="display:none;">
+          <div class="form-group">
+            <label>Reference Alignment</label>
+            <div class="form-row">
+              <select id="compare-ref-select" class="select flex-1">
+                <option value="">Select reference...</option>
+                <option value="human">Human Reference</option>
+                <option value="moore">Moore Reference</option>
+                <option value="upload">Upload .al File</option>
+              </select>
+              <button class="btn btn-sm btn-accent" id="btn-compare">Compare</button>
+            </div>
+          </div>
+          <input type="file" id="compare-file-input" accept=".al,.xml" style="display:none">
+          <div class="compare-results" id="compare-results" style="display:none;">
+            <div class="compare-metrics">
+              <div class="metric">
+                <span class="metric-label">Precision</span>
+                <span class="metric-value" id="metric-precision">—</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Recall</span>
+                <span class="metric-value" id="metric-recall">—</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Common</span>
+                <span class="metric-value" id="metric-common">—</span>
+              </div>
+            </div>
+            <pre class="result-pre" id="compare-diff"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ═══ Error Toast ═══ -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

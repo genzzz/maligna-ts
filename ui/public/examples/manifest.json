@@ -1,0 +1,80 @@
+[
+  {
+    "name": "poznan-small",
+    "displayName": "Poznan Small",
+    "sourceLang": "pl",
+    "targetLang": "de",
+    "sourceFile": "poznan-small-pl.txt",
+    "targetFile": "poznan-small-de.txt",
+    "sourceSize": 1028,
+    "targetSize": 982,
+    "references": {}
+  },
+  {
+    "name": "poznan",
+    "displayName": "Poznan",
+    "sourceLang": "pl",
+    "targetLang": "de",
+    "sourceFile": "poznan-pl.txt",
+    "targetFile": "poznan-de.txt",
+    "sourceSize": 4251,
+    "targetSize": 4146,
+    "references": {
+      "human": "poznan.al",
+      "moore": "poznan.al",
+      "split": "poznan.al"
+    }
+  },
+  {
+    "name": "gpl",
+    "displayName": "GPL",
+    "sourceLang": "pl",
+    "targetLang": "en",
+    "sourceFile": "gpl-pl.txt",
+    "targetFile": "gpl-en.txt",
+    "sourceSize": 42832,
+    "targetSize": 34695,
+    "references": {
+      "human": "gpl.al",
+      "moore": "gpl.al",
+      "split": "gpl.al"
+    }
+  },
+  {
+    "name": "stallman-ch1",
+    "displayName": "Stallman Ch1",
+    "sourceLang": "pl",
+    "targetLang": "en",
+    "sourceFile": "stallman-ch1-pl.txt",
+    "targetFile": "stallman-ch1-en.txt",
+    "sourceSize": 25965,
+    "targetSize": 24958,
+    "references": {
+      "human": "stallman-ch1.al",
+      "moore": "stallman-ch1.al",
+      "split": "stallman-ch1.al"
+    }
+  },
+  {
+    "name": "help",
+    "displayName": "Help",
+    "sourceLang": "pl",
+    "targetLang": "en",
+    "sourceFile": "help-pl.txt",
+    "targetFile": "help-en.txt",
+    "sourceSize": 63823,
+    "targetSize": 54148,
+    "references": {}
+  },
+  {
+    "name": "stallman",
+    "displayName": "Stallman",
+    "sourceLang": "pl",
+    "targetLang": "en",
+    "sourceFile": "stallman-pl.txt",
+    "targetFile": "stallman-en.txt",
+    "sourceSize": 415407,
+    "targetSize": 390199,
+    "references": {}
+  }
+]

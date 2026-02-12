@@ -1,0 +1,79 @@
+{
+  "name": "maligna-ts",
+  "version": "0.0.1",
+  "description": "Sentence alignment toolkit",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "maligna": "./dist/cli/index.cjs"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsup",
+    "prepack": "npm run build",
+    "pack:check": "npm pack --dry-run",
+    "start": "node dist/cli/index.cjs",
+    "typecheck": "tsc --noEmit",
+    "analyze:unused": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "alignment",
+    "sentence-alignment",
+    "nlp",
+    "translation",
+    "viterbi",
+    "gale-church",
+    "moore",
+    "poisson",
+    "tmx"
+  ],
+  "author": "Genci Shabani",
+  "contributors": [
+    "Jarek Lipski",
+    "Jimmy O'Regan"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genzzz/maligna-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/genzzz/maligna-ts/issues"
+  },
+  "homepage": "https://github.com/genzzz/maligna-ts/",
+  "sideEffects": false,
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
