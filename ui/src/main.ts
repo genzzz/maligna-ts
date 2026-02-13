@@ -6,6 +6,7 @@ import { loadManifest } from './examples';
 import { initDropzone } from './dropzone';
 import { initCompare } from './compare';
 import { initDownload, clearResults, displayResults } from './results';
+import type { PrimaryFormat } from './results';
 import { showToast } from './toast';
 import { runPipeline } from './engine';
 import type { PipelineInput, StepProgress } from './engine';
@@ -139,6 +140,8 @@ function hideProgress(): void {
 }
 
 function onStepProgress(progress: StepProgress): void {
+  const stepsContainer = document.getElementById('progress-steps');
+
   if (!progress.done) {
     // Step starting
     const label = document.getElementById('progress-label');
@@ -151,10 +154,9 @@ function onStepProgress(progress: StepProgress): void {
     stepDiv.className = 'progress-step-item active';
     stepDiv.id = `progress-step-${progress.index}`;
     stepDiv.textContent = `[${progress.index + 1}/${progress.total}] ${progress.name}...`;
-    document.getElementById('progress-steps')?.appendChild(stepDiv);
+    stepsContainer?.appendChild(stepDiv);
   } else {
     // Step complete
-    const stepsContainer = document.getElementById('progress-steps');
     const lastStep = stepsContainer?.lastElementChild;
     if (lastStep) {
       lastStep.classList.remove('active');
@@ -164,6 +166,14 @@ function onStepProgress(progress: StepProgress): void {
       if (progress.elapsed) text += `, ${progress.elapsed}ms`;
       text += ')';
       lastStep.textContent = text;
+    }
+
+    const isFinalFormattingStep = progress.index === progress.total - 1;
+    if (isFinalFormattingStep && progress.infoText?.trim()) {
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'progress-step-item progress-step-stats';
+      infoDiv.textContent = progress.infoText;
+      stepsContainer?.appendChild(infoDiv);
     }
   }
 }
@@ -192,7 +202,7 @@ async function handleRunPipeline(): Promise<void> {
   }
 
   // Collect format options
-  const formatClass = (document.getElementById('format-class') as HTMLSelectElement)?.value || 'presentation';
+  const formatClass = ((document.getElementById('format-class') as HTMLSelectElement)?.value || 'presentation') as PrimaryFormat;
   const format = {
     class: formatClass,
     width: parseInt((document.getElementById('format-width') as HTMLInputElement)?.value, 10) || 100,
@@ -226,7 +236,10 @@ async function handleRunPipeline(): Promise<void> {
 
   try {
     const result = await runPipeline(pipeline, state.examples, onStepProgress);
-    displayResults(result);
+    displayResults({
+      ...result,
+      selectedFormat: formatClass,
+    });
     hideProgress();
   } catch (err: any) {
     showToast('Pipeline failed: ' + err.message, 'error');

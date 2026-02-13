@@ -5,14 +5,57 @@
 import { state } from './state';
 import { showToast } from './toast';
 
-export function clearResults(): void {
-  const ids = ['result-presentation', 'result-info', 'result-al', 'result-tmx'];
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = 'Processing...';
+export type PrimaryFormat = 'presentation' | 'html' | 'al' | 'tmx';
+
+const DOWNLOAD_EXT: Record<PrimaryFormat, string> = {
+  presentation: '.txt',
+  html: '.html',
+  al: '.al',
+  tmx: '.tmx',
+};
+
+function setResultMode(mode: 'text' | 'html', codeLike = false): void {
+  const pre = document.getElementById('result-output-pre') as HTMLElement | null;
+  const html = document.getElementById('result-output-html') as HTMLElement | null;
+  if (!pre || !html) return;
+
+  if (mode === 'html') {
+    pre.style.display = 'none';
+    html.style.display = '';
+    pre.classList.remove('result-code');
+    return;
   }
-  const html = document.getElementById('result-html');
+
+  html.style.display = 'none';
+  pre.style.display = '';
+  if (codeLike) {
+    pre.classList.add('result-code');
+  } else {
+    pre.classList.remove('result-code');
+  }
+}
+
+function getSelectedContent(formatted: Record<string, string>, selectedFormat: PrimaryFormat): string {
+  switch (selectedFormat) {
+    case 'presentation':
+      return formatted.presentation || '';
+    case 'html':
+      return formatted.html || '';
+    case 'al':
+      return formatted.al || '';
+    case 'tmx':
+      return formatted.tmx || '';
+    default:
+      return '';
+  }
+}
+
+export function clearResults(): void {
+  const pre = document.getElementById('result-output-pre');
+  if (pre) pre.textContent = 'Processing...';
+  const html = document.getElementById('result-output-html');
   if (html) html.innerHTML = 'Processing...';
+  setResultMode('text');
 
   const count = document.getElementById('result-count');
   if (count) count.textContent = '';
@@ -27,26 +70,23 @@ export function clearResults(): void {
 export function displayResults(data: {
   formatted: Record<string, string>;
   alignmentCount: number;
+  selectedFormat: PrimaryFormat;
 }): void {
-  const { formatted, alignmentCount } = data;
+  const { formatted, alignmentCount, selectedFormat } = data;
 
-  const pres = document.getElementById('result-presentation');
-  if (pres) pres.textContent = formatted.presentation || '';
-  const info = document.getElementById('result-info');
-  if (info) info.textContent = formatted.info || '';
-  const al = document.getElementById('result-al');
-  if (al) al.textContent = formatted.al || '';
-  const tmx = document.getElementById('result-tmx');
-  if (tmx) tmx.textContent = formatted.tmx || '';
+  const pre = document.getElementById('result-output-pre');
+  const htmlContainer = document.getElementById('result-output-html');
 
-  // HTML result — inject the actual HTML
-  const htmlContainer = document.getElementById('result-html');
-  if (htmlContainer) {
-    if (formatted.html) {
-      htmlContainer.innerHTML = formatted.html;
-    } else {
-      htmlContainer.textContent = 'No HTML output available.';
+  if (selectedFormat === 'html') {
+    setResultMode('html');
+    if (htmlContainer) {
+      htmlContainer.innerHTML = formatted.html || 'No HTML output available.';
     }
+  } else {
+    const content = getSelectedContent(formatted, selectedFormat);
+    const codeLike = selectedFormat === 'al' || selectedFormat === 'tmx';
+    setResultMode('text', codeLike);
+    if (pre) pre.textContent = content;
   }
 
   const countEl = document.getElementById('result-count');
@@ -73,40 +113,16 @@ function downloadText(text: string, filename: string): void {
 
 export function initDownload(): void {
   document.getElementById('btn-download')?.addEventListener('click', () => {
-    if (!state.lastAlResult) return;
+    const formatSelect = document.getElementById('format-class') as HTMLSelectElement | null;
+    const selectedFormat = (formatSelect?.value || 'presentation') as PrimaryFormat;
 
-    // Find active result tab
-    const activeTab = document.querySelector('#result-tabs .tab.active') as HTMLElement | null;
-    const tabName = activeTab?.dataset.tab || 'result-al';
     let content = '';
-    let ext = '.al';
-
-    switch (tabName) {
-      case 'result-presentation':
-        content = document.getElementById('result-presentation')?.textContent || '';
-        ext = '.txt';
-        break;
-      case 'result-html':
-        content = document.getElementById('result-html')?.innerHTML || '';
-        ext = '.html';
-        break;
-      case 'result-info':
-        content = document.getElementById('result-info')?.textContent || '';
-        ext = '.txt';
-        break;
-      case 'result-al':
-        content = state.lastAlResult;
-        ext = '.al';
-        break;
-      case 'result-tmx':
-        content = document.getElementById('result-tmx')?.textContent || '';
-        ext = '.tmx';
-        break;
-      default:
-        content = state.lastAlResult;
-        ext = '.al';
+    if (selectedFormat === 'html') {
+      content = document.getElementById('result-output-html')?.innerHTML || '';
+    } else {
+      content = document.getElementById('result-output-pre')?.textContent || '';
     }
 
-    downloadText(content, `maligna-result${ext}`);
+    downloadText(content, `maligna-result${DOWNLOAD_EXT[selectedFormat]}`);
   });
 }

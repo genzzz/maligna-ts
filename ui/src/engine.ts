@@ -12,7 +12,6 @@ import {
   AlParser,
   PlaintextParser,
   AlFormatter,
-  PlaintextFormatter,
   TmxFormatter,
   PresentationFormatter,
   HtmlFormatter,
@@ -130,6 +129,7 @@ export interface StepProgress {
   total: number;
   alignmentCount?: number;
   elapsed?: number;
+  infoText?: string;
   done?: boolean;
 }
 
@@ -504,19 +504,26 @@ export function formatAlignments(
 ): Record<string, string> {
   const results: Record<string, string> = {};
 
-  results.presentation = new PresentationFormatter(format.width ?? 79).format(alignmentList);
-  results.html = new HtmlFormatter().format(alignmentList);
-  results.info = new InfoFormatter().format(alignmentList);
   results.al = new AlFormatter().format(alignmentList);
+  results.info = new InfoFormatter().format(alignmentList);
 
-  const sl = format.sourceLang || 'source';
-  const tl = format.targetLang || 'target';
-  results.tmx = new TmxFormatter(sl, tl).format(alignmentList);
-
-  const pf = new PlaintextFormatter();
-  const separate = pf.formatSeparate(alignmentList);
-  results.txtSource = separate.source;
-  results.txtTarget = separate.target;
+  switch (format.class) {
+    case 'presentation':
+      results.presentation = new PresentationFormatter(format.width ?? 79).format(alignmentList);
+      break;
+    case 'html':
+      results.html = new HtmlFormatter().format(alignmentList);
+      break;
+    case 'tmx': {
+      const sl = format.sourceLang || 'source';
+      const tl = format.targetLang || 'target';
+      results.tmx = new TmxFormatter(sl, tl).format(alignmentList);
+      break;
+    }
+    case 'al':
+    default:
+      break;
+  }
 
   return results;
 }
@@ -570,6 +577,7 @@ export async function runPipeline(
     index: totalSteps - 1,
     total: totalSteps,
     alignmentCount: alignmentList.length,
+    infoText: formatted.info || '',
     done: true,
   });
 
