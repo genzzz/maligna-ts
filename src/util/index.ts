@@ -1,2 +1,3 @@
 export { toScore, toProbability, scoreSum, merge, round } from './util';
-export { Pair, pair } from './Pair';
+export type { Pair } from './Pair';
+export { pair } from './Pair';

@@ -1,4 +1,4 @@
-import { LanguageModel, MutableLanguageModel } from './LanguageModel';
+import { MutableLanguageModel, type LanguageModel } from './LanguageModel';
 
 /**
  * Trains a language model from a list of word ID segments.

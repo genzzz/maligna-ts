@@ -1,5 +1,5 @@
 import { TargetData, compareTargetDataByProbability } from './TargetData';
-import { SourceData, TranslationModel, InitialSourceData, EmptySourceData } from './TranslationModel';
+import { InitialSourceData, EmptySourceData, type SourceData, type TranslationModel } from './TranslationModel';
 import { Vocabulary } from '../vocabulary/Vocabulary';
 
 /**

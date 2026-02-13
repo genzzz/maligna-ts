@@ -1,10 +1,8 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import * as fs from 'fs';
 
 // Core types
-import { Alignment } from '../coretypes/Alignment';
+import type { Alignment } from '../coretypes/Alignment';
 import { BEST_CATEGORY_MAP } from '../coretypes/CategoryDefaults';
 
 // Parsers
@@ -21,10 +19,10 @@ import { HtmlFormatter } from '../formatter/HtmlFormatter';
 import { InfoFormatter } from '../formatter/InfoFormatter';
 
 // Filters
-import { Filter } from '../filter/Filter';
+import type { Filter } from '../filter/Filter';
 import { Aligner } from '../filter/aligner/Aligner';
 import { UnifyAligner } from '../filter/aligner/UnifyAligner';
-import { AlignAlgorithm } from '../filter/aligner/align/AlignAlgorithm';
+import type { AlignAlgorithm } from '../filter/aligner/align/AlignAlgorithm';
 import { ViterbiAlgorithm } from '../filter/aligner/align/hmm/viterbi/ViterbiAlgorithm';
 import { ForwardBackwardAlgorithm } from '../filter/aligner/align/hmm/fb/ForwardBackwardAlgorithm';
 import { AdaptiveBandAlgorithm } from '../filter/aligner/align/hmm/adaptive/AdaptiveBandAlgorithm';
@@ -34,7 +32,7 @@ import {
 } from '../filter/aligner/align/hmm/HmmAlignAlgorithmFactory';
 import { OneToOneAlgorithm } from '../filter/aligner/align/onetoone/OneToOneAlgorithm';
 import { Modifier } from '../filter/modifier/Modifier';
-import { ModifyAlgorithm, NullModifyAlgorithm } from '../filter/modifier/modify/ModifyAlgorithm';
+import { NullModifyAlgorithm, type ModifyAlgorithm } from '../filter/modifier/modify/ModifyAlgorithm';
 import { WordSplitAlgorithm } from '../filter/modifier/modify/split/WordSplitAlgorithm';
 import { SentenceSplitAlgorithm } from '../filter/modifier/modify/split/SentenceSplitAlgorithm';
 import { ParagraphSplitAlgorithm } from '../filter/modifier/modify/split/ParagraphSplitAlgorithm';
@@ -64,18 +62,18 @@ import {
 } from '../filter/macro';
 
 // Calculators
-import { Calculator } from '../calculator/Calculator';
+import type { Calculator } from '../calculator/Calculator';
 import { NormalDistributionCalculator } from '../calculator/length/NormalDistributionCalculator';
 import { PoissonDistributionCalculator } from '../calculator/length/PoissonDistributionCalculator';
 import { TranslationCalculator } from '../calculator/content/TranslationCalculator';
 import { OracleCalculator } from '../calculator/content/OracleCalculator';
-import { Counter, CharCounter, SplitCounter } from '../calculator/length/Counter';
+import { CharCounter, SplitCounter, type Counter } from '../calculator/length/Counter';
 import { CompositeCalculator, MinimumCalculator } from '../calculator/meta';
 
 // Matrix
 import { FullMatrixFactory } from '../matrix/FullMatrix';
 import { BandMatrixFactory } from '../matrix/BandMatrix';
-import { MatrixFactory } from '../matrix/Matrix';
+import type { MatrixFactory } from '../matrix/Matrix';
 
 // Models
 import { Vocabulary } from '../model/vocabulary/Vocabulary';
@@ -87,8 +85,8 @@ import {
   createTruncatedVocabulary,
 } from '../model/vocabulary/VocabularyUtil';
 import { trainLanguageModel, parseLanguageModel } from '../model/language/LanguageModelUtil';
-import { LanguageModel } from '../model/language/LanguageModel';
-import { TranslationModel } from '../model/translation/TranslationModel';
+import type { LanguageModel } from '../model/language/LanguageModel';
+import type { TranslationModel } from '../model/translation/TranslationModel';
 import {
   DEFAULT_TRAIN_ITERATION_COUNT,
   trainTranslationModel,

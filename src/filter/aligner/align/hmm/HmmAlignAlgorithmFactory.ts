@@ -1,6 +1,6 @@
-import { Calculator } from '../../../../calculator/Calculator';
-import { AlignAlgorithm } from '../AlignAlgorithm';
-import { BandMatrixFactory } from '../../../../matrix/BandMatrix';
+import type { Calculator } from '../../../../calculator/Calculator';
+import type { AlignAlgorithm } from '../AlignAlgorithm';
+import type { BandMatrixFactory } from '../../../../matrix/BandMatrix';
 import { ViterbiAlgorithm } from './viterbi/ViterbiAlgorithm';
 import { ForwardBackwardAlgorithm } from './fb/ForwardBackwardAlgorithm';
 

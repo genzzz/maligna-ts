@@ -1,4 +1,4 @@
-export { Formatter } from './Formatter';
+export type { Formatter } from './Formatter';
 export { AlFormatter } from './AlFormatter';
 export { PlaintextFormatter } from './PlaintextFormatter';
 export { TmxFormatter } from './TmxFormatter';

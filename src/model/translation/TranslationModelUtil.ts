@@ -1,4 +1,4 @@
-import { TranslationModel } from './TranslationModel';
+import type { TranslationModel } from './TranslationModel';
 import { MutableTranslationModel, InitialTranslationModel, MutableSourceData } from './MutableTranslationModel';
 import { Vocabulary } from '../vocabulary/Vocabulary';
 

@@ -1,4 +1,4 @@
-import { LengthModel, MutableLengthModel } from './LengthModel';
+import { MutableLengthModel, type LengthModel } from './LengthModel';
 
 /**
  * Trains a length model from a list of segment lengths.

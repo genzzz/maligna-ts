@@ -1,8 +1,8 @@
-import { Calculator } from '../Calculator';
+import type { Calculator } from '../Calculator';
 import { Vocabulary } from '../../model/vocabulary/Vocabulary';
-import { LanguageModel } from '../../model/language/LanguageModel';
-import { TranslationModel } from '../../model/translation/TranslationModel';
-import { ModifyAlgorithm } from '../../filter/modifier/modify/ModifyAlgorithm';
+import type { LanguageModel } from '../../model/language/LanguageModel';
+import type { TranslationModel } from '../../model/translation/TranslationModel';
+import type { ModifyAlgorithm } from '../../filter/modifier/modify/ModifyAlgorithm';
 import { toScore } from '../../util/util';
 
 /**

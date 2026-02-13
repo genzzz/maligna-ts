@@ -1,4 +1,4 @@
-export { Calculator } from './Calculator';
+export type { Calculator } from './Calculator';
 export { CalculatorMock } from './CalculatorMock';
 export * from './length';
 export * from './content';
