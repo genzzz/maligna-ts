@@ -24,6 +24,7 @@ import {
 // ─── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  registerServiceWorker();
   initTabs();
   loadManifest();
   initPipelineButtons();
@@ -32,6 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
   initCompare();
   initDownload();
 });
+
+function registerServiceWorker(): void {
+  if (!('serviceWorker' in navigator) || import.meta.env.DEV) return;
+
+  const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(serviceWorkerUrl, {
+      scope: import.meta.env.BASE_URL,
+    }).catch((error) => {
+      console.error('Service worker registration failed:', error);
+    });
+  });
+}
 
 // ─── Pipeline Buttons ──────────────────────────────────────────────────────────
 

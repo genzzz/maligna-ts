@@ -89,6 +89,16 @@ const formatter = new PresentationFormatter();
 console.log(formatter.format(alignmentList));
 ```
 
+## UI offline cache (service worker)
+
+The Vite UI in `ui/` now registers a service worker in build/preview mode.
+
+- App shell files are cached for offline startup.
+- Example files under `examples/` use **network-first** with cache fallback.
+- During local development (`npm run dev`), service worker registration is disabled to avoid HMR cache issues.
+
+If you need a clean cache while testing, open browser DevTools and unregister the service worker + clear storage for the site.
+
 ## Package metadata
 
 - Name: `maligna-ts`
